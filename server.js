@@ -4,11 +4,14 @@ const path = require('path');
 const express = require("express");
 const PORT = process.env.PORT || 3001;
 const app = express();
+
 // parse incoming string or array data
 app.use(express.urlencoded({ extended: true }));
 // parse incoming JSON data
 app.use(express.json());
 const { animals } = require("./data/animals");
+// access static front end code
+app.use(express.static('public'));
 
 //filter by query
 function filterByQuery(query, animalsArray) {
@@ -54,11 +57,13 @@ function filterByQuery(query, animalsArray) {
   // return the filtered results:
   return filteredResults;
 }
+
 // filter through animal array by ID
 function findById(id, animalsArray) {
   const result = animalsArray.filter((animal) => animal.id === id)[0];
   return result;
 }
+
 //function for handling post data from req.body and adding it to animals.json
 function createNewAnimal(body, animalsArray) {
   const animal = body;
@@ -71,6 +76,7 @@ function createNewAnimal(body, animalsArray) {
   // return finished code to post route for response
   return animal;
 }
+
 // validate new animal meets data requirements 
 function validateAnimal(animal) {
   if (!animal.name || typeof animal.name !== 'string') {
@@ -87,6 +93,7 @@ function validateAnimal(animal) {
   }
   return true;
 }
+
 // route to animals
 app.get("/api/animals", (req, res) => {
   let results = animals;
@@ -95,6 +102,7 @@ app.get("/api/animals", (req, res) => {
   }
   res.json(results);
 });
+
 // route to specific animal based on ID, 404 error if not found
 app.get("/api/animals/:id", (req, res) => {
   const result = findById(req.params.id, animals);
@@ -104,6 +112,7 @@ app.get("/api/animals/:id", (req, res) => {
     res.send(404);
   }
 });
+
 //
 app.post("/api/animals", (req, res) => {
   // set id based on what the next index of the array will be 
@@ -119,6 +128,21 @@ app.post("/api/animals", (req, res) => {
 
   res.json(animal);
   }
+});
+
+// serve to index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'));
+});
+
+// serve to animals.html
+app.get('/animals', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/animals.html'));
+});
+
+// serve to zookeepers.html 
+app.get('/zookeepers', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/zookeepers.html'));
 });
 
 // listen for PORT other than 3001
